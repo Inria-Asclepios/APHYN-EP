@@ -1,2 +1,2 @@
-# APHYN-EP
-Code for APHYN-EP model
+# APHYN-EP-training
+
