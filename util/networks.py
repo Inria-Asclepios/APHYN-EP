@@ -26,10 +26,6 @@ class DerivativeEstimator(nn.Module):
         super().__init__()
         self.enables_residual = enables_residual
 
-#         assert isinstance(physical_model, nn.Module) 
-#         if self.enables_residual:
-#             assert isinstance(residual_model, nn.Module)
-
         self.phy = physical_model
         self.res = residual_model
         
@@ -40,7 +36,7 @@ class DerivativeEstimator(nn.Module):
         else:
             phy = self.phy(t, x)
             if self.enables_residual:
-                res = self.res(x) # x[:,[0]] for Laplacian(V,H)
+                res = self.res(x)
                 out = phy + res
             else:
                 out = phy
@@ -58,16 +54,12 @@ class Forecaster(nn.Module):
         self.method = method
 
     def forward(self, yT, coord_stim, t=None):
-        ## usage first_seq = u[:, :, :T_pred], yT = u[:, :, T_pred]
         
         phy_mod = self.derivative_estimator.phy
         
         if phy_mod!=None:
             phy_mod.coord_stim = coord_stim
             phy_mod.H = None
-        
-        ### phy_mod.y0T is used only for network-parametrisation
-        # phy_mod.y0T = first_seq
 
         ## solves dy/dt = func(t, y), y(t[0]) = y0, odeint(func, y0, ...)
         forecasts = self.int_(self.derivative_estimator, y0=yT, t=t, method=self.method) 
@@ -114,12 +106,10 @@ class Laplacian_2(nn.Module):
         self.param['t_open'] = 100./120.
         self.param['t_close'] = 100./150
         self.param['v_gate'] = 0.13
-        self.param['t_stim'] = 0.1*0.1 #0.1*1.
+        self.param['t_stim'] = 0.1*0.1
         
         self.coord_stim = None
         self.window = [5]
-#         intensity = [1.]
-#         t_0_stim = [0.]
         
         self.V0 = None 
         self.H0 = None 
@@ -156,7 +146,6 @@ class Laplacian_2(nn.Module):
         else:
             for name in self.param_names:
                 self.param[name] = self.fc_param['fc_'+name]
-#                 self.param[name] = torch.sigmoid(self.fc_param['fc_'+name]) #* 1e-2
 
         if t == 0:
             self.V0 = deepcopy(V)
@@ -170,7 +159,6 @@ class Laplacian_2(nn.Module):
                                                     self.n_domain, 
                                                     self.n_domain))).to(self.device,dtype=torch.float) 
                 
-                # better to add Jstim in V0
                 self.V0 = torch.from_numpy(np.zeros((V.size()[0], 1, 
                                                      self.n_domain, 
                                                      self.n_domain))).to(self.device,dtype=torch.float)
@@ -196,9 +184,6 @@ class Laplacian_2(nn.Module):
         
         ## F is torch.nn.functional 
         V_ = F.pad(V, pad=(1,1,1,1), mode='replicate')
-        ## with  boundary cond  
-        # V_ = F.pad(V, pad=(1,1,1,1), mode='constant', value=0.0)
-        
         
         Delta_v = F.conv2d(V_, self._kernel.to(self.device, dtype=torch.float))
         J_stim_ = self.J_stim(t,self.param['t_stim']*10.,coord_stim, window)
@@ -215,8 +200,6 @@ class Laplacian_2(nn.Module):
     
     def J_stim (self, t, t_stim, coord_stim, window = [5], intensity = [1.], t_0_stim = [0.]):
         
-        ## How to simulate 2 and more onesets on the same frame ? -> ? deeper list 
-        ## t_stim is the same for all simulations ? 
         n_points = coord_stim.size()[0]
         result = torch.zeros((n_points,1,self.n_domain, self.n_domain)).to(self.device, dtype=torch.float)
         
@@ -242,111 +225,3 @@ class Laplacian_2(nn.Module):
         else :
             return 0.5*(1+np.sign(x1-x2))
         
-               
-        
-### F_phy(V,H) -> (V,H)           
-class Laplacian(nn.Module):
-    # usage in code Laplacian2(dx=train_set.dx, enables_reaction=False, estim_param_names=['name1', name2, ..], T_pred=5, in_ch=2, network=False)
-
-    def __init__(self, dx_step, estim_param_names, n_domain, device, network=False):
-
-        super().__init__()
-
-        self._dx = dx_step
-        self.device = device
-        
-        self._kernel = nn.Parameter(torch.tensor(
-            [
-                [ 0,  1,  0],
-                [ 1, -4,  1],
-                [ 0,  1,  0],
-            ],
-        ).float().view(1, 1, 3, 3) / (self._dx * self._dx), requires_grad=False) #.to(self.device, dtype=torch.float)
-
-        self.n_domain = n_domain
-        self.network = network
-        self.full_param_names = ['d','t_in', 't_out', 't_open', 't_close', 'v_gate', 't_stim']
-        
-        self.param_names = estim_param_names
-
-        self.param = {}
-        self.fc_param = nn.ParameterDict({})
-        
-        ### Real values 
-        self.param['d'] = 0.1*1. #1 
-        self.param['t_in'] = 0.1/0.3
-        self.param['t_out'] = 1./6.
-        self.param['t_open'] = 100./120.
-        self.param['t_close'] = 100./150
-        self.param['v_gate'] = 0.13
-        self.param['t_stim'] = 0.1*1.
-        
-        
-        # self.y0T = None
-        self.coord_stim = None
-        self.window = 5
-
-        for name in self.param_names:
-            self.param[name] = None
-            
-            if network:
-                pass
-                ## needs : T_pred, in_ch, ?sequence_param (network=True)
-                # self.fc_param['fc_'+name] = ParameterEstimator(T=T_pred, factor=1e-2 , in_ch=in_ch, sequence_param=sequence_param)
-            else:
-                ## fc_param init value is scalar ?-2
-                self.fc_param['fc_'+name] = nn.Parameter(torch.tensor(0.2), requires_grad=True) #-2. #.to(self.device, dtype=torch.float) 
-            
-            
-    def forward(self, t, x):
-        V = x[:,[0]]
-        H = x[:,[1]]
-            
-        coord_stim = self.coord_stim
-        window = self.window
-        
-        ## parameters are estimated via Sigmoid (same for all) or ParameterEstimator.forward (in case network ==True)
-        if self.network:
-            pass
-            #  if self.y0T != None:
-            #  for name in self.param_names:
-            #  self.param[name] = self.fc_param['fc_'+name](self.y0T)
-        
-        else:
-            for name in self.param_names:
-                self.param[name] = self.fc_param['fc_'+name]
-#                 self.param[name] = torch.sigmoid(self.fc_param['fc_'+name]) #* 1e-2
-             
-        ## F is torch.nn.functional 
-        V_ = F.pad(V, pad=(1,1,1,1), mode='replicate')
-        
-        ## with  boundary cond  
-        # V_ = F.pad(V, pad=(1,1,1,1), mode='constant', value=0.0)
-        
-        
-        Delta_v = F.conv2d(V_, self._kernel.to(self.device, dtype=torch.float))
-        J_stim_ = self.J_stim(t,self.param['t_stim']*10.,coord_stim, window)
-        
-        output_v = (self.param['d']*10.* Delta_v + \
-                    self.param['t_in']*10.*(1.-V)*V.pow(2)*H - \
-                    self.param['t_out']*V + J_stim_)
-        output_h = ((self.param['t_open']/100.)*self.sign_(self.param['v_gate'], V)*(1-H)-
-                    (self.param['t_close']/100.)*self.sign_(V, self.param['v_gate'])*H)
-        
-        return torch.cat([output_v, output_h], dim=1)
-    
-    
-    def J_stim (self, t, t_stim, coord_stim, window = 5, intensity = 1.):
-        ## !!! Add intensity like list + stim t0
-        n_points = coord_stim.size()[0]
-        result = torch.zeros((n_points,1,self.n_domain, self.n_domain)).to(self.device, dtype=torch.float)
-        for i in range(n_points):
-            result[i,:, coord_stim[i,0]:coord_stim[i,0]+window,
-                   coord_stim[i,1]:coord_stim[i,1]+window] = intensity*self.sign_(t_stim, t)
-        return result
-    
-    def sign_ (self, x1, x2, torch_ = True):
-        if torch_:
-            return 0.5*(1+torch.sign(x1-x2))
-        else :
-            return 0.5*(1+np.sign(x1-x2))

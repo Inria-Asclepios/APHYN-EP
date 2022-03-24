@@ -10,16 +10,18 @@ class TrainOptions(BaseOptions):
         parser = BaseOptions.initialize(self, parser)
         
         ## dataset parameters
+        ### for data generation
         parser.add_argument('--data_ext', action='store_true', help='data extending (on on 3 remaining quarters of the cardiac slab)')
         parser.add_argument('--t_any', action='store_true', help='data extending by time')
         parser.add_argument('--t_len', type=int, default=10, help='number of frames per data sample (for train and valid)')
+        ### for training
         parser.add_argument('--max_dataset_size', type=float, default=1e+8, help='maximum size of input dataset (for train and valid)')
         parser.add_argument('--batch_size', type=int, default=32, help='input batch size')
         
         parser.add_argument('--disable_adapt_hor', action='store_true', help='disable adaptive horizons')
-        parser.add_argument('--start_horizon', type=int, default=2, help='total (if "not_adapt_hor" is ON) or starting number of frames for training forecasting horizons')
-        parser.add_argument('--stop_horizon', type=int, default=6, help='last number of frames for training forecasting horizons')
-        parser.add_argument('--adapt_horizon_step', type=int, default=4, help='changing step for number of frames for training forecasting horizons')
+        parser.add_argument('--start_horizon', type=int, default=2, help='total (if "disable_adapt_hor" is ON) or starting number of frames for training forecasting horizon')
+        parser.add_argument('--stop_horizon', type=int, default=6, help='terminating number of frames for training forecasting horizon')
+        parser.add_argument('--adapt_horizon_step', type=int, default=4, help='step to change the number of frames in adaptive horizon strategy')
         
         
         ## training parameters

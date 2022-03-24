@@ -19,11 +19,11 @@ class BaseOptions():
         ## basic parameters
         parser.add_argument('--name', required=True, type=str, default='experiment_name', help='name of the experiment. It decides where to store image results and models')
         parser.add_argument('--dataroot', type=str, default=None, help='path to images (should have subfolders train, valid, test)')
-        parser.add_argument('--result_dir', type=str, default='./results', help='results are saved here')
+        parser.add_argument('--result_dir', type=str, default='./results', help='path to the folder to store image results and models')
         
         ## dataset parameters
-        parser.add_argument('--t_pred', type=int, default=0, help='number of frames for dynamics prediction')
-        parser.add_argument('--domain_size', type=int, default=24, help='size of domen for data generation')
+        parser.add_argument('--t_pred', type=int, default=0, help='number of starting frame for dynamics prediction')
+        parser.add_argument('--domain_size', type=int, default=24, help='size of domain for data generation')
 
         
         ## model parameters
@@ -33,7 +33,7 @@ class BaseOptions():
         parser.add_argument('--disable_phys', action='store_true', help='do not use physical model')
         parser.add_argument('--dx_step', type=float, default=1.0, help='dx step in physical model')
         parser.add_argument('--dt_step', type=float, default=0.05, help='dt step in physical model')
-        parser.add_argument('--estim_param_names', type=str, default='', help='estimated physical model paramers names (need to gbe separated with "space") [d, t_stim, t_in, t_out, t_open, t_close, v_gate]')
+        parser.add_argument('--estim_param_names', type=str, default='', help='estimated physical model paramers names (need to be separated with "space") [d, t_stim, t_in, t_out, t_open, t_close, v_gate]')
         ### data-driven model parameters
         parser.add_argument('--disable_residual', action='store_true', help='do not use data-driven model')
         parser.add_argument('--in_ch', type=int, default=1, help='number of input channels in data-driven model')
@@ -66,7 +66,7 @@ class BaseOptions():
     def print_options(self, opt):
         """Print and save options
         It will print both current options and default values(if different).
-        It will save options into a text file / [checkpoints_dir] / opt.txt
+        It will save options into a text file / [result_dir/name] / opt.txt
         """
         message = ''
         message += '----------------- Options ---------------\n'

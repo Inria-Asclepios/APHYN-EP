@@ -27,7 +27,7 @@ class Training():
         self.forecaster = model
     
         if model.derivative_estimator.phy != None:
-            self.estim_param_names = model.derivative_estimator.phy.param_names # check ////////////////////////////
+            self.estim_param_names = model.derivative_estimator.phy.param_names 
         else:
             self.estim_param_names = []
         
@@ -68,7 +68,7 @@ class Training():
 
             estim_param_names = self.estim_param_names
             
-            tany = self.opt.t_any #////////////////////////////////////////////////////////////
+            tany = self.opt.t_any 
             print('t_any : ', tany)
             
             lambd_ = self.opt.init_lmbd_loss 
@@ -142,7 +142,7 @@ class Training():
                             norm = 0.
                             norm_list.append(norm)
                         else: 
-                            ## norm for my ResNet
+                            ## norm for ResNet
                             seq = v[:,:, T_pred] 
                             ele = self.forecaster.derivative_estimator.res(seq)
                             batch_v = v.size(0)
@@ -156,7 +156,6 @@ class Training():
                             self.explode_ = True
                             self.forecaster = forecaster_old_dict
                             losses = [0]*4
-#                             break
                             return self.forecaster, losses, param_list
 
                         if dataset_label_=='train':
@@ -185,16 +184,15 @@ class Training():
                         message_ += ',\t avg {} : {:.5f}'.format(param, np.mean(param_list[param]))
                     message_ += ',\t norm : {:.5f}'.format(loss_n_value)
 
-                #     bar_epoch.set_postfix_str(message_)
 
                     print(message_)
 
-                if self.explode_: ## dublicate ///////////////////////////
+                if self.explode_: 
                     print('\n\n\n EXPLODE')
                     break
 
                 if adapatative:
-                    lambd_ = lambd_ + tau_2 * self.loss_valid[-1] # self.loss_train[-1]
+                    lambd_ = lambd_ + tau_2 * self.loss_train[-1]
                     
                 #### test + imgs
                 if create_results:

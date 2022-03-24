@@ -13,7 +13,7 @@ class DataLoader():
         sampler = torch.utils.data.sampler.SubsetRandomSampler(np.arange(self.dataset.len))
         if phase=='test':
             sampler = None
-#         print("dataset [%s] was created" % self.name)
+
         self.dataloader = torch.utils.data.DataLoader(self.dataset,
                                                       sampler=sampler,
                                                       batch_size=opt.batch_size,

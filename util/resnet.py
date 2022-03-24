@@ -6,14 +6,6 @@ import itertools
 import random 
 import numpy as np
 
-# Call
-# Resnet_2D(input_nc=1,
-#           output_nc=1, 
-#           ngf=25, norm_layer=nn.BatchNorm2d,
-#           n_blocks=3, padding_type='reflect',
-#           n_downsampling=2).to(opt.device)
-
-
 ############################################################################
 ### ResNet
 ### Code from https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/
@@ -118,11 +110,6 @@ class Resnet_2D(nn.Module):
                  norm_layer(ngf),
                  nn.ReLU(True)]
 
-#         model = [nn.ReflectionPad2d(3),
-#                  nn.Conv2d(input_nc, ngf, kernel_size=7, padding=0, bias=use_bias),
-#                  norm_layer(ngf),
-#                  nn.ReLU(True)]
-
         for i in range(n_downsampling):  # add downsampling layers
             mult = 2 ** i
             model += [nn.Conv2d(ngf * mult, ngf * mult * 2, kernel_size=3, stride=2, padding=1, bias=use_bias),
@@ -154,8 +141,6 @@ class Resnet_2D(nn.Module):
         else:
             raise NotImplementedError('padding [%s] is not implemented' % padding_type)
             
-#         model += [nn.ReflectionPad2d(3)]
-#         model += [nn.Conv2d(ngf, output_nc, kernel_size=7, padding=0)]
 
         model += [nn.Tanh()]
 
