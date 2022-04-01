@@ -12,7 +12,7 @@ class TrainOptions(BaseOptions):
         ## dataset parameters
         ### for data generation
         parser.add_argument('--data_ext', action='store_true', help='data extending (on on 3 remaining quarters of the cardiac slab)')
-        parser.add_argument('--t_any', action='store_true', help='data extending by time')
+#         parser.add_argument('--t_any', action='store_true', help='data extending by time')
         parser.add_argument('--t_len', type=int, default=10, help='number of frames per data sample (for train and valid)')
         ### for training
         parser.add_argument('--max_dataset_size', type=float, default=1e+8, help='maximum size of input dataset (for train and valid)')
