@@ -7,7 +7,7 @@ import scipy.io
 import torch.utils.data as data
 from abc import ABC, abstractmethod
 
-def make_dataset(dir, max_dataset_size=float("inf"), extension = '.npy'):
+def make_dataset(dir, max_dataset_size=float("inf"), extension = '.mat'):
     assert os.path.isdir(dir), '%s is not a valid directory' % dir
     img_paths = glob.glob(dir+'/*{}'.format(extension))
     return img_paths[:min(max_dataset_size, len(img_paths))]
@@ -42,6 +42,7 @@ class BaseDataset(data.Dataset, ABC):
             a dictionary of data with their names. It ususally contains the data itself and its metadata information.
         """
         pass
+
     
 class DataGenerator(BaseDataset):
     """
@@ -56,11 +57,11 @@ class DataGenerator(BaseDataset):
         BaseDataset.__init__(self, opt)
         dataroot = os.path.join(opt.dataroot, phase)
 
-        self.paths_ = sorted(make_dataset(dataroot, max_dataset_size=int(opt.max_dataset_size)))  
+        self.paths_ = sorted(make_dataset(dataroot, opt.max_dataset_size))  
         self.len = len(self.paths_) 
         self.extended = opt.data_ext
 
-    def __getitem__(self, index):
+    def __getitem__(self, index, pot_min = -90, pot_max = 40, n_domain = 24):
         """Return a data point and its metadata information.
         Parameters:
             index (int)      -- a random integer for data indexing
@@ -68,9 +69,31 @@ class DataGenerator(BaseDataset):
         """
         item_path = self.paths_[index % self.len]  # make sure index is within then range
         
-        np_dict = np.load(item_path, allow_pickle=True)
+        mat = scipy.io.loadmat(item_path)
+        mat['potential_norm'] = (mat['potential']-pot_min)/(pot_max-pot_min)
+            
+        potential_ = mat['potential_norm'][:,:,0].transpose(2, 0, 1)[:,:n_domain,:n_domain]
+        axis_expand = 0
+        coord_x, coord_y, _ = mat['stimCoords'][0]
+
+        if self.extended:
+            potential_ext = [potential_]
+            potential_ext.append(np.flip(potential_, axis=2))
+            potential_ext.append(np.flip(potential_, axis=1))
+            potential_ext.append(np.flip(potential_ext[-1], axis=2))
+            V_res = np.array(potential_ext)
+              
+            coord_ext = [[coord_x, coord_y]]
+            coord_ext.append([coord_x, n_domain-coord_y])
+            coord_ext.append([n_domain-coord_x, coord_y])
+            coord_ext.append([n_domain-coord_x, n_domain-coord_y])
+            coord_res = np.array(coord_ext)
+            
+        else:
+            V_res = np.expand_dims(potential_,axis=0)
+            coord_res = np.array([coord_x, coord_y])
         
-        return np_dict.item()
+        return {'V': V_res, 'stim_point':coord_res}
 
     def __len__(self):
         """Return the total number of images in the dataset.
