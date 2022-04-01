@@ -5,7 +5,7 @@ Test code associated with [article accepted for the conference MIDL 2022](https:
 <!-- <img src="images/Model_scheme.svg" width="800" title="Model structures used in this repository"> -->
 
 ## Getting Started
-------
+
 ### Prerequisites
 - Linux or macOS
 - Python 3.7+
