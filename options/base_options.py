@@ -33,7 +33,7 @@ class BaseOptions():
         parser.add_argument('--disable_phys', action='store_true', help='do not use physical model')
         parser.add_argument('--dx_step', type=float, default=1.0, help='dx step in physical model')
         parser.add_argument('--dt_step', type=float, default=0.05, help='dt step in physical model')
-        parser.add_argument('--estim_param_names', type=str, default='', help='estimated physical model paramers names (need to be separated with "space") [d, t_stim, t_in, t_out, t_open, t_close, v_gate]')
+        parser.add_argument('--estim_param_names', type=str, default='', help='estimated physical model paramers names (need to be separated with ",") [d, t_stim, t_in, t_out, t_open, t_close, v_gate]')
         ### data-driven model parameters
         parser.add_argument('--disable_residual', action='store_true', help='do not use data-driven model')
         parser.add_argument('--in_ch', type=int, default=1, help='number of input channels in data-driven model')
