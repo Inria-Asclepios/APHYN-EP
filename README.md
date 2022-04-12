@@ -37,7 +37,7 @@ python train.py --name aphynep --dataroot ./data_ttp/ --batch_size 4 --estim_par
 ```
 
 ## Data
-To evaluate APHYN-EP framework, we used a dataset of transmembrane potential activation simulatedwith a monodomain reaction-diffusion equation and the Ten Tusscher – Noble – Noble –Panfilov ionic model ([Ten Tusscher et al., 2004](https://pubmed.ncbi.nlm.nih.gov/14656705/)), which represents 12 different transmem-brane ionic currents.  The simulations were performed with a recent version of the propag-5software ([Krause et al., 2012](https://link.springer.com/chapter/10.1007/978-3-642-30397-5_11); [Potse, 2018](https://pubmed.ncbi.nlm.nih.gov/29731720)) and added into folder `data_ttp`. 
+To evaluate APHYN-EP framework, we used a dataset of transmembrane potential activation simulated with a monodomain reaction-diffusion equation and the Ten Tusscher – Noble – Noble –Panfilov ionic model ([Ten Tusscher et al., 2004](https://pubmed.ncbi.nlm.nih.gov/14656705/)), which represents 12 different transmem-brane ionic currents.  The simulations were performed with a recent version of the propag-5 software ([Krause et al., 2012](https://link.springer.com/chapter/10.1007/978-3-642-30397-5_11); [Potse, 2018](https://pubmed.ncbi.nlm.nih.gov/29731720)) and added into folder `data_ttp`. 
 
 You can use an open source package [`Finitewave`](https://github.com/TiNezlobinsky/Finitewave), if you want to simulate more data with the same properties or/and with more complex geometries of cardiac tissue.
 
