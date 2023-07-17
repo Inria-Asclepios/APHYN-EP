@@ -14,8 +14,8 @@ Test code associated with [article accepted for the conference MIDL 2022](https:
 ### Installation
 - Clone this repo:
 ```bash
-git clone https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix
-cd pytorch-CycleGAN-and-pix2pix
+git clone https://github.com/Inria-Asclepios/APHYN-EP
+cd APHYN-EP
 ```
 
 ### Requirements
